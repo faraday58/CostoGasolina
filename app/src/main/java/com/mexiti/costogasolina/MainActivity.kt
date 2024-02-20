@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -189,8 +190,8 @@ fun AddTip(
 
 }
 
-
-private fun calcularMonto(precio: Double, cantLitros: Double, darPropina: Boolean, propina:Double ): String{
+@VisibleForTesting
+internal fun calcularMonto(precio: Double, cantLitros: Double, darPropina: Boolean, propina:Double ): String{
     var monto = precio * cantLitros
     if ( darPropina){
         monto +=  propina
