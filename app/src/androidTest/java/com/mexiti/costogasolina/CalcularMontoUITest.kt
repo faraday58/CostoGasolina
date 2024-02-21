@@ -29,10 +29,26 @@ class CalcularMontoUITest {
         val montoEsperado = NumberFormat.getCurrencyInstance().format(478.8)
 
         composeTestRule.onNodeWithText("Monto Total: $montoEsperado").
+        assertExists("No se encontro ningún nodo con este texto")
+    }
+
+}
+
+
+  /*
+
+        composeTestRule.onNodeWithText("Ingresa precio por litro de Gasolina")
+            .performTextInput("23.94")
+        composeTestRule.onNodeWithText("Litros")
+            .performTextInput("20")
+
+        val montoEsperado = NumberFormat.getCurrencyInstance().format(478.8)
+
+        composeTestRule.onNodeWithText("Monto Total: $montoEsperado").
                 assertExists("No se encontro ningún nodo con este texto")
 
     }
 
 
 
-}
+}*/

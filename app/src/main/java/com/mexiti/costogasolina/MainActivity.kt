@@ -183,7 +183,8 @@ fun AddTip(
         )
         Switch(
             checked = darPropina ,
-            onCheckedChange = onTipCheckedChange
+            onCheckedChange = onTipCheckedChange,
+
         )
     }
 
