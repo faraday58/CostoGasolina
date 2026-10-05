@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.mexiti.costogasolina"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.mexiti.costogasolina"
@@ -51,8 +51,13 @@ android {
 
 dependencies {
 
-    val roomVersion = "2.6.1"
+    //Librerías de navegación de Jetpack Compose
+    val nav_version = "2.10.2"
+    implementation("androidx.navigation:navigation-compose:${nav_version}")
 
+
+    //Librerías de Room, manejo de bases de datos
+    val roomVersion = "2.8.5"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
