@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,17 +38,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mexiti.costogasolina.R
+import com.mexiti.costogasolina.ui.components.ActionElevatedButton
 import com.mexiti.costogasolina.ui.theme.CostoGasolinaTheme
 import java.text.NumberFormat
 
 @Composable
 fun AddView(navController: NavController, modifier: Modifier = Modifier){
-    CostGasLayout()
+    CostGasLayout(navController)
 }
 
 
 @Composable
-fun CostGasLayout() {
+fun CostGasLayout(navController: NavController) {
     var precioLitroEntrada by remember {
         mutableStateOf("")
     }
@@ -123,6 +125,19 @@ fun CostGasLayout() {
             fontSize = 30.sp
         )
 
+        Spacer(modifier = Modifier.height(150.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            ActionElevatedButton(
+                onClick = {
+                    navController.popBackStack()
+                },
+                text = "Agregar"
+            )
+        }
+
     }
 
 }
@@ -186,10 +201,11 @@ internal fun calcularMonto(precio: Double, cantLitros: Double, darPropina: Boole
     return NumberFormat.getCurrencyInstance().format(monto)
 
 }
+/*
 @Preview(showBackground = true)
 @Composable
 fun CostGasLayoutPreview() {
     CostoGasolinaTheme {
         CostGasLayout()
     }
-}
+}*/
