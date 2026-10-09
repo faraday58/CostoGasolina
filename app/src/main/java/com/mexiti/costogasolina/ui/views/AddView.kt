@@ -1,8 +1,5 @@
 package com.mexiti.costogasolina.ui.views
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,22 +9,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -38,18 +34,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mexiti.costogasolina.R
+import com.mexiti.costogasolina.domain.calcularMonto
 import com.mexiti.costogasolina.ui.components.ActionElevatedButton
+import com.mexiti.costogasolina.ui.components.EditNumberField
 import com.mexiti.costogasolina.ui.theme.CostoGasolinaTheme
-import java.text.NumberFormat
+import com.mexiti.costogasolina.ui.components.AddTip
+import com.mexiti.costogasolina.ui.components.FloatButton
+import com.mexiti.costogasolina.ui.components.MainTitle
+
 
 @Composable
 fun AddView(navController: NavController, modifier: Modifier = Modifier){
     CostGasLayout(navController)
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CostGasLayout(navController: NavController) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    MainTitle(title = stringResource(id = R.string.calcular_monto))
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatButton(onClick = {
+                navController.popBackStack()
+            })
+        }
+    ) {
+        CostGasContent(
+            onAgregarClicked = {
+                navController.popBackStack()
+            },
+            modifier = Modifier.padding(it)
+        )
+    }
+
+}
+
+
+
+@Composable
+fun CostGasContent(
+    onAgregarClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var precioLitroEntrada by remember {
         mutableStateOf("")
     }
@@ -72,17 +107,8 @@ fun CostGasLayout(navController: NavController) {
         modifier = Modifier.fillMaxSize()
             .padding(15.dp)
             .background(Color.LightGray, shape = RoundedCornerShape(15.dp)),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = stringResource(R.string.calcular_monto),
-            modifier= Modifier.fillMaxWidth()
-                .height(50.dp),
-            fontWeight = FontWeight.Bold,
-            fontSize = 25.sp
-            ,
-            textAlign = TextAlign.Center
-        )
 
         EditNumberField(
             label = R.string.ingresa_gasolina,
@@ -104,6 +130,13 @@ fun CostGasLayout(navController: NavController) {
             value = cantLitrosEntrada,
             onValueChanged = {cantLitrosEntrada = it}
         )
+
+
+
+        AddTip(darPropina = darPropina
+            , onTipCheckedChange = {darPropina = it}
+
+        )
         EditNumberField(
             label = R.string.propina,
             leadingIcon = R.drawable.outline_18_up_rating_24,
@@ -114,98 +147,30 @@ fun CostGasLayout(navController: NavController) {
             value = propinaEntrada,
             onValueChanged = {propinaEntrada = it}
         )
-        AddTip(darPropina = darPropina
-            , onTipCheckedChange = {darPropina = it}
 
-        )
-
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = stringResource(R.string.monto_total,total),
             fontWeight = FontWeight.Black,
             fontSize = 30.sp
         )
 
-        Spacer(modifier = Modifier.height(150.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            ActionElevatedButton(
-                onClick = {
-                    navController.popBackStack()
-                },
-                text = "Agregar"
-            )
-        }
-
     }
 
 }
 
-@Composable
-fun EditNumberField(
-    @StringRes label: Int,
-    @DrawableRes leadingIcon: Int,
-    keyboardsOptions:KeyboardOptions,
-    value: String,
-    onValueChanged: (String) -> Unit,
-    modifier: Modifier = Modifier
-){
-    TextField(
-        label = { Text(text = stringResource(id = label))  },
-        value = value,
-        singleLine = true,
-        leadingIcon = { Icon(painter = painterResource(id = leadingIcon) , contentDescription = null) },
-        keyboardOptions = keyboardsOptions,
-        modifier = modifier.fillMaxWidth()
-        ,
-        onValueChange = onValueChanged,
-
-        )
-
-}
 
 
-@Composable
-fun AddTip(
-    darPropina: Boolean,
-    onTipCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-){
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .size(70.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(id = R.string.agregar_propina),
-            modifier = Modifier.padding(20.dp)
-        )
-        Switch(
-            checked = darPropina ,
-            onCheckedChange = onTipCheckedChange,
-
-            )
-    }
 
 
-}
 
-@VisibleForTesting
-internal fun calcularMonto(precio: Double, cantLitros: Double, darPropina: Boolean, propina:Double ): String{
-    var monto = precio * cantLitros
-    if ( darPropina){
-        monto +=  propina
-    }
-    return NumberFormat.getCurrencyInstance().format(monto)
 
-}
-/*
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CostGasLayoutPreview() {
     CostoGasolinaTheme {
-        CostGasLayout()
+        CostGasContent (
+            onAgregarClicked = {}
+        )
     }
-}*/
+}
