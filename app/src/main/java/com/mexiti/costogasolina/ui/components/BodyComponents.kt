@@ -24,10 +24,11 @@ fun MainTitle(title: String){
 
 
 @Composable
-fun AddTip(
-    darPropina: Boolean,
-    onTipCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+fun AddOptionalData(
+    flagData: Boolean,
+    onflagCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    question:String = stringResource(id = R.string.agregar_propina)
 ){
     Row(
         modifier = modifier
@@ -38,12 +39,12 @@ fun AddTip(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.agregar_propina),
+            text = question,
             modifier = Modifier.padding(20.dp)
         )
         Switch(
-            checked = darPropina ,
-            onCheckedChange = onTipCheckedChange,
+            checked = flagData ,
+            onCheckedChange = onflagCheckedChange,
 
             )
     }
@@ -59,6 +60,6 @@ fun MainTitlePreview(){
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AddTipPreview(){
-    AddTip(darPropina = true, onTipCheckedChange = {})
+fun AddOptionalDataPreview(){
+    AddOptionalData(flagData = true, onflagCheckedChange = {})
 }
