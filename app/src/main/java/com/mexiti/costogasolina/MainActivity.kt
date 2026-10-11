@@ -50,16 +50,12 @@ import java.text.NumberFormat
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val db = Room.databaseBuilder(
             applicationContext,
             GasolineDatabase::class.java,
             "gasoline_db"
         ).build()
-
         val dao = db.gasolineDao()
-
-
         setContent {
             CostoGasolinaTheme {
                 // A surface container using the 'background' color from the theme
@@ -67,7 +63,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     NavManager(dao)
                 }
             }

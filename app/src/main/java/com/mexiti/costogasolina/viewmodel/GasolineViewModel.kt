@@ -10,14 +10,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class GasolineViewModel(private val gasolineDao: GasolineDao): ViewModel() {
-
     val transaction: StateFlow<List<GasolineTransaction>> = gasolineDao.getAllTransactions()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
-
     fun addTransaction(
         price: Double,
         liters: Double,
@@ -34,11 +32,6 @@ class GasolineViewModel(private val gasolineDao: GasolineDao): ViewModel() {
                 kilometers = kilometers
             )
             gasolineDao.insertTransaction(newTransaction)
-
-
         }
-
     }
-
-
 }
