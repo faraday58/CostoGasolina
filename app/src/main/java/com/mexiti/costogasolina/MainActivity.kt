@@ -40,7 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.Room
 import com.mexiti.costogasolina.navigation.NavManager
+import com.mexiti.costogasolina.room.GasolineDatabase
 import com.mexiti.costogasolina.ui.theme.CostoGasolinaTheme
 import com.mexiti.costogasolina.ui.views.CostGasLayout
 import java.text.NumberFormat
@@ -48,6 +50,16 @@ import java.text.NumberFormat
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            GasolineDatabase::class.java,
+            "gasoline_db"
+        ).build()
+
+        val dao = db.gasolineDao()
+
+
         setContent {
             CostoGasolinaTheme {
                 // A surface container using the 'background' color from the theme
@@ -55,7 +67,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavManager()
+
+                    NavManager(dao)
                 }
             }
         }

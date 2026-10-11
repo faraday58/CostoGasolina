@@ -11,17 +11,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,21 +44,41 @@ import com.mexiti.costogasolina.R
 import com.mexiti.costogasolina.domain.calcularMonto
 import com.mexiti.costogasolina.ui.components.AddOptionalData
 import com.mexiti.costogasolina.ui.components.EditNumberField
-import com.mexiti.costogasolina.ui.components.FloatButton
 import com.mexiti.costogasolina.ui.components.MainTitle
 import com.mexiti.costogasolina.ui.theme.CostoGasolinaTheme
+import com.mexiti.costogasolina.viewmodel.GasolineViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun AddView(navController: NavController, modifier: Modifier = Modifier) {
-    CostGasLayout(navController = navController, modifier = modifier)
+fun AddView(
+    navController: NavController,
+    viewModel: GasolineViewModel,
+    modifier: Modifier = Modifier
+) {
+    CostGasLayout(
+        navController = navController,
+        onSaveTransaction = { price, liters, tip, date, kilometers ->
+            viewModel.addTransaction(price, liters, tip, date, kilometers)
+        },
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CostGasLayout(
     navController: NavController,
+    onSaveTransaction: (Double,Double,Double,String,Double) -> Unit ,
     modifier: Modifier = Modifier
 ) {
+    //Estado para gestionar el Snackbar temporal
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -58,22 +86,36 @@ fun CostGasLayout(
                 title = {
                     MainTitle(title = stringResource(id = R.string.calcular_monto))
                 },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navController.popBackStack() }) {
+                        // Icono de flecha de retroceso
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Regresar"
+
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         },
-        floatingActionButton = {
-            FloatButton(onClick = {
-                navController.popBackStack()
-            })
-        }
+        snackbarHost = {  SnackbarHost(snackbarHostState) }
+
     ) { innerPadding ->
         CostGasContent(
-            onAgregarClicked = {
-                navController.popBackStack()
-            },
+           onSaveTransaction = { price, liters, tip, date, kilometers ->
+                 onSaveTransaction(price,liters,tip,date,kilometers)
+               scope.launch {
+                   snackbarHostState.showSnackbar("✓ Registro guardado correctamente")
+                   delay(800)
+                   navController.popBackStack()
+               }
+           }
+            ,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -81,7 +123,7 @@ fun CostGasLayout(
 
 @Composable
 fun CostGasContent(
-    onAgregarClicked: () -> Unit,
+    onSaveTransaction: (Double, Double, Double, String, Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var precioLitroEntrada by remember { mutableStateOf("") }
@@ -91,10 +133,17 @@ fun CostGasContent(
     var guardarKilometros by remember { mutableStateOf(false) }
     var kilometrsRecorridos by remember { mutableStateOf("") }
 
+    // Conversión segura de valores obligatorios y opcionales
     val precioLitro = precioLitroEntrada.toDoubleOrNull() ?: 0.0
     val cantLitros = cantLitrosEntrada.toDoubleOrNull() ?: 0.0
     val propina = if (darPropina) propinaEntrada.toDoubleOrNull() ?: 0.0 else 0.0
+    val kilometraje = if (guardarKilometros) kilometrsRecorridos.toDoubleOrNull() ?: 0.0 else 0.0
+
     val total = calcularMonto(precioLitro, cantLitros, darPropina = darPropina, propina = propina)
+
+    // Validar que los campos obligatorios contengan valores válidos > 0
+    val isFormValid = precioLitro > 0.0 && cantLitros > 0.0
+
 
     Column(
         modifier = modifier
@@ -197,6 +246,24 @@ fun CostGasContent(
                 )
             }
         }
+
+        Button(
+            onClick = {
+                val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    .format(Date())
+                onSaveTransaction(
+                    precioLitro,
+                    cantLitros,
+                    propina,
+                    currentDate,
+                    kilometraje
+                )
+            },
+            enabled = isFormValid,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Guardar Registro")
+        }
     }
 }
 
@@ -205,7 +272,14 @@ fun CostGasContent(
 fun CostGasLayoutPreview() {
     CostoGasolinaTheme {
         CostGasContent(
-            onAgregarClicked = {}
+            onSaveTransaction = {
+                precio: Double,
+                litros: Double,
+                tip: Double,
+                date: String,
+                kilometers: Double ->
+            }
+
         )
     }
 }
